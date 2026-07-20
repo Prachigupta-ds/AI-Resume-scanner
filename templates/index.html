@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Resume Screening & Candidate Ranking</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- =========================
+            SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+    <div class="logo">
+
+        <div class="logo-icon">
+            🤖
+        </div>
+
+        <div>
+            <h2>ATS AI</h2>
+            <span>Recruiter Dashboard</span>
+        </div>
+
+    </div>
+
+    <nav class="sidebar-menu">
+
+        <a href="#dashboard" class="active">
+            <span>🏠</span>
+            Dashboard
+        </a>
+
+        <a href="#candidates">
+            <span>👥</span>
+            Candidates
+        </a>
+
+        <a href="#analytics">
+            <span>📊</span>
+            Analytics
+        </a>
+
+        <a href="#reports">
+            <span>📄</span>
+            Reports
+        </a>
+
+        <a href="#settings">
+            <span>⚙</span>
+            Settings
+        </a>
+
+    </nav>
+
+</aside>
+
+
+
+    <!-- =========================
+            MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content" id="dashboard">
+
+        <!-- Header -->
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    AI Resume Screening &
+                    Candidate Ranking
+                </h1>
+
+                <p>
+                    Smart ATS Resume Analyzer powered by AI
+                </p>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="status-pill">
+
+                    🟢 System Online
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =========================
+                Upload Section
+        ========================== -->
+
+        <section class="upload-card">
+
+            <div class="upload-title">
+
+                <h2>
+
+                    📤 Upload Resume
+
+                </h2>
+
+                <p>
+
+                    Upload multiple resumes and compare
+                    candidates automatically.
+
+                </p>
+
+            </div>
+
+            <form
+                action="/analyze"
+                method="POST"
+                enctype="multipart/form-data"
+                id="resumeForm">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Resume Files (PDF / DOCX)
+
+                    </label>
+
+                    <input
+                        type="file"
+                        name="resume"
+                        multiple
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Job Description
+
+                    </label>
+
+                    <textarea
+                        name="job_description"
+                        rows="9"
+                        placeholder="Paste Job Description..."
+                        required></textarea>
+
+                </div>
+
+                <button
+                    class="analyze-btn"
+                    id="analyzeBtn"
+                    type="submit">
+
+                    🚀 Analyze Resume
+
+                </button>
+
+                <div
+                    id="loading"
+                    class="loading-area"
+                    style="display:none;">
+
+                    <div class="loader"></div>
+
+                    <p>
+
+                        AI is analyzing resumes...
+
+                    </p>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- =========================
+                RESULTS
+        ========================== -->
+
+
+
+{% if all_candidates %}
+
+<!-- =====================================================
+                    DASHBOARD OVERVIEW
+====================================================== -->
+
+<section class="dashboard-section">
+
+    <div class="section-header">
+
+        <div>
+
+            <h2>📊 Dashboard Overview</h2>
+
+            <p>Quick insights from the latest resume analysis</p>
+
+        </div>
+
+    </div>
+<div class="dashboard-overview">
+
+    <div class="dashboard-card">
+
+        <div class="card-icon">👥</div>
+
+        <div class="card-title">Candidates</div>
+
+        <div class="card-value">{{ total_candidates }}</div>
+
+    </div>
+
+    <div class="dashboard-card">
+
+        <div class="card-icon">🏆</div>
+
+        <div class="card-title">Highest ATS</div>
+
+        <div class="card-value">{{ highest_score }}%</div>
+
+    </div>
+
+    <div class="dashboard-card">
+
+        <div class="card-icon">📈</div>
+
+        <div class="card-title">Average ATS</div>
+
+        <div class="card-value">{{ average_score }}%</div>
+
+    </div>
+
+    <div class="dashboard-card">
+
+        <div class="card-icon">✅</div>
+
+        <div class="card-title">Recommended</div>
+
+        <div class="card-value">{{ recommended }}</div>
+
+    </div>
+
+</div>
+
+
+</section>
+
+
+
+<!-- =====================================================
+                    BEST CANDIDATE
+====================================================== -->
+
+{% if best_candidate %}
+
+<section class="hero-card" id="reports">
+    <div class="hero-left">
+
+        <span class="winner-badge">
+
+            🥇 Best Candidate
+
+        </span>
+
+        <h2>
+
+            {{ best_candidate.name }}
+
+        </h2>
+
+        <p>
+
+            This candidate achieved the highest ATS score and is
+            currently the strongest match for the provided job
+            description.
+
+        </p>
+
+        <div class="hero-stats">
+
+            <div>
+
+                <small>ATS Score</small>
+
+                <h3>{{ best_candidate.score }}%</h3>
+
+            </div>
+
+            <div>
+
+                <small>Status</small>
+
+                <h3>Highly Recommended</h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="hero-right">
+
+        <div class="hero-score">
+
+            {{ best_candidate.score }}%
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+
+<!-- =====================================================
+                    SEARCH
+====================================================== -->
+
+<section class="search-section">
+
+    <div class="search-box">
+
+        <span>🔍</span>
+
+        <input
+            id="searchCandidate"
+            type="text"
+            placeholder="Search candidate by name...">
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+                    ANALYTICS
+====================================================== -->
+
+<section class="analytics-section" id="analytics">
+    <div class="analytics-header">
+
+        <h2>
+
+            📈 Candidate Performance
+
+        </h2>
+
+        <p>
+
+            ATS score comparison for all uploaded resumes.
+
+        </p>
+
+    </div>
+
+    <div class="chart-card">
+
+        <canvas id="rankingChart"></canvas>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+                    CANDIDATES
+====================================================== -->
+
+
+
+<!-- ==========================
+        Candidate Cards
+========================== -->
+
+<div id="candidates">
+{% for candidate in all_candidates %}
+
+<div class="candidate-card"
+     data-name="{{ candidate.name | lower }}">
+
+    <!-- Hidden Data -->
+    <div id="candidate-{{ loop.index }}"
+         style="display:none;"
+         data-name="{{ candidate.name }}"
+         data-score="{{ candidate.score }}"
+         data-summary="{{ candidate.summary if candidate.summary else '' }}"
+         data-matched="{{ candidate.matched_skills | join(', ') }}"
+         data-missing="{{ candidate.missing_skills | join(', ') }}">
+
+        {{ candidate.result|safe }}
+
+    </div>
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="candidate-top">
+
+    <div class="candidate-left">
+
+        <div class="candidate-profile">
+
+            <div class="candidate-avatar">
+
+                {% if loop.index==1 %}
+                    🥇
+                {% elif loop.index==2 %}
+                    🥈
+                {% elif loop.index==3 %}
+                    🥉
+                {% else %}
+                    👤
+                {% endif %}
+
+            </div>
+
+            <div class="candidate-info">
+
+                <span class="rank-badge">
+                    Rank #{{ loop.index }}
+                </span>
+
+                <h2>{{ candidate.name }}</h2>
+
+                <p class="candidate-status">
+
+                    {% if candidate.score>=90 %}
+                        🟢 Highly Recommended
+
+                    {% elif candidate.score>=75 %}
+                        🟡 Recommended
+
+                    {% elif candidate.score>=60 %}
+                        🟠 Moderate Match
+
+                    {% else %}
+                        🔴 Needs Improvement
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="candidate-right">
+
+        <div class="score-circle">
+
+            <svg width="150" height="150">
+
+                <circle
+                    cx="75"
+                    cy="75"
+                    r="60"
+                    class="circle-bg">
+                </circle>
+
+                <circle
+                    cx="75"
+                    cy="75"
+                    r="60"
+                    class="circle-progress"
+                    style="stroke-dashoffset:{{ 377-(377*candidate.score/100) }};">
+                </circle>
+
+            </svg>
+
+            <div class="score-text">
+
+                {{ candidate.score }}%
+
+                <span>ATS</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+    <!-- ================= SKILLS ================= -->
+
+   <div class="skills-section two-column">
+
+    <div class="skill-column">
+
+        <h3>✅ Matching Skills</h3>
+
+        <div class="skill-list">
+
+            {% if candidate.matched_skills %}
+
+                {% for skill in candidate.matched_skills %}
+
+                    <span class="skill-tag">{{ skill }}</span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No matching skills.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="skill-column">
+
+        <h3>❌ Missing Skills</h3>
+
+        <div class="skill-list">
+
+            {% if candidate.missing_skills %}
+
+                {% for skill in candidate.missing_skills %}
+
+                    <span class="missing-tag">{{ skill }}</span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <span class="skill-tag">🎉 No Missing Skills</span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <div class="candidate-footer center-btn">
+
+        <button
+            class="view-btn"
+            onclick="openModal({{ loop.index }})">
+
+            👁 View Full Analysis
+
+        </button>
+
+    </div>
+
+</div>
+
+{% endfor %}
+</div>
+
+
+
+<!-- Download Report -->
+
+<br>
+
+<div style="text-align:center;">
+
+    <a href="/download">
+
+        <button class="download-btn">
+
+            📄 Download PDF Report
+
+        </button>
+
+    </a>
+
+</div>
+
+{% endif %}
+
+
+
+<!-- ==========================
+        Candidate Details Modal
+========================== -->
+
+<div id="candidateModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close">&times;</span>
+
+        <div class="carousel-wrapper">
+
+    <div id="modalBody"></div>
+
+</div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================
+        Loading Animation
+========================== -->
+
+<script>
+
+document
+.getElementById("resumeForm")
+.addEventListener("submit",function(){
+
+    document.getElementById("loading").style.display="block";
+
+    document.getElementById("analyzeBtn").disabled=true;
+
+    document.getElementById("analyzeBtn").innerHTML="Analyzing...";
+
+});
+
+</script>
+
+
+
+<!-- ==========================
+        Ranking Chart
+========================== -->
+
+{% if all_candidates %}
+
+<script>
+
+const candidateNames=[
+
+{% for candidate in all_candidates %}
+
+"{{ candidate.name }}",
+
+{% endfor %}
+
+];
+
+
+
+const candidateScores=[
+
+{% for candidate in all_candidates %}
+
+{{ candidate.score }},
+
+{% endfor %}
+
+];
+
+
+
+const ctx=document.getElementById("rankingChart");
+
+if(ctx){
+
+new Chart(ctx,{
+
+type:"bar",
+
+data:{
+
+labels:candidateNames,
+
+datasets:[{
+
+label:"ATS Score",
+
+data:candidateScores,
+
+backgroundColor:[
+
+"#2563eb",
+
+"#3b82f6",
+
+"#60a5fa",
+
+"#93c5fd",
+
+"#bfdbfe",
+
+"#dbeafe"
+
+],
+
+borderRadius:12
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+display:false
+
+}
+
+},
+
+animation:{
+
+duration:1800
+
+},
+
+scales:{
+
+y:{
+
+beginAtZero:true,
+
+max:100
+
+}
+
+}
+
+}
+
+});
+
+}
+
+</script>
+
+{% endif %}
+
+
+
+<!-- ==========================
+        Search Candidate
+========================== -->
+
+<script>
+
+const searchBox=document.getElementById("searchCandidate");
+
+if(searchBox){
+
+searchBox.addEventListener("keyup",function(){
+
+const value=this.value.toLowerCase();
+
+const cards=document.querySelectorAll(".candidate-card");
+
+cards.forEach(card=>{
+
+const name=card.dataset.name;
+
+if(name.includes(value)){
+
+card.style.display="block";
+
+}
+
+else{
+
+card.style.display="none";
+
+}
+
+});
+
+});
+
+}
+
+</script>
+
+
+
+<!-- ==========================
+        Modal JavaScript
+========================== -->
+
+<script>
+
+let currentSlide = 0;
+
+function openModal(id){
+
+    const candidate = document.getElementById("candidate-"+id);
+
+    const fileName = candidate.dataset.name;
+
+// Remove extension (.pdf, .docx, etc.)
+const cleanName = fileName
+    .replace(/\.(pdf|doc|docx)$/i, "")
+    .replace(/_/g, " ")
+    .replace(/resume/gi, "")
+    .trim();
+
+    const score = candidate.dataset.score;
+
+    const summary = candidate.dataset.summary || "Summary not available.";
+
+    const matched = candidate.dataset.matched || "";
+
+    const missing = candidate.dataset.missing || "No Missing Skills 🎉";
+
+    const ai = candidate.innerHTML;
+
+    document.getElementById("modalBody").innerHTML = `
+
+<div class="slide active">
+
+<div class="modal-top">
+
+<h1>👤 ${cleanName}</h1>
+
+<p class="resume-file">
+📄 Resume File<br>
+${fileName}
+</p>
+
+<div class="score-circle">
+
+    <svg width="180" height="180">
+
+        <circle
+            cx="90"
+            cy="90"
+            r="75"
+            class="circle-bg">
+        </circle>
+
+        <circle
+            cx="90"
+            cy="90"
+            r="75"
+            class="circle-progress"
+            style="stroke-dashoffset:${472-(472*score/100)};">
+        </circle>
+
+    </svg>
+
+    <div class="score-text">
+
+        ${score}%
+
+        <span>ATS SCORE</span>
+
+    </div>
+
+</div>
+
+<h3 class="recommendation">
+
+${score>=80
+? "🏅 Highly Recommended"
+: score>=60
+? "👍 Recommended"
+: score>=40
+? "⚠ Needs Improvement"
+: "❌ Not Recommended"}
+
+</h3>
+
+</div>
+
+</div>
+
+
+
+<div class="slide">
+
+<div class="modal-card">
+
+<h2>📄 Resume Summary</h2>
+
+<p>${summary}</p>
+
+</div>
+
+</div>
+
+
+
+<div class="slide">
+
+<div class="modal-card">
+
+<h2>✅ Matching Skills</h2>
+
+<div id="matchedSkills"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="slide">
+
+<div class="modal-card">
+
+<h2>❌ Missing Skills</h2>
+
+<div id="missingSkills"></div>
+
+</div>
+
+</div>
+
+
+
+<div class="slide">
+
+<div class="modal-card">
+
+<h2>🤖 AI Recommendation</h2>
+
+${ai}
+
+</div>
+
+</div>
+
+
+
+<div class="navigation">
+
+    <button id="prevBtn">
+
+        ◀ Previous
+
+    </button>
+
+    <div id="slideCounter" class="slide-dots">
+
+        <span class="dot active"></span>
+
+        <span class="dot"></span>
+
+        <span class="dot"></span>
+
+        <span class="dot"></span>
+
+        <span class="dot"></span>
+
+    </div>
+
+    <button id="nextBtn">
+
+        Next ▶
+
+    </button>
+
+</div>
+`;
+
+// ---------- Matching Skills ----------
+    const matchedContainer = document.getElementById("matchedSkills");
+
+    if(matched.trim()!=""){
+
+        matched.split(",").forEach(skill=>{
+
+            if(skill.trim()!=""){
+
+                matchedContainer.innerHTML +=
+                `<span class="skill-tag">${skill.trim()}</span>`;
+
+            }
+
+        });
+
+    }else{
+
+        matchedContainer.innerHTML="<p>No matching skills found.</p>";
+
+    }
+
+
+// ---------- Missing Skills ----------
+    const missingContainer=document.getElementById("missingSkills");
+
+    if(missing.trim().toLowerCase().includes("no missing")){
+
+        missingContainer.innerHTML=
+        `<span class="skill-tag">🎉 No Missing Skills</span>`;
+
+    }
+
+    else{
+
+        missing.split(",").forEach(skill=>{
+
+            if(skill.trim()!=""){
+
+                missingContainer.innerHTML +=
+                `<span class="missing-tag">${skill.trim()}</span>`;
+
+            }
+
+        });
+
+    }
+
+
+    document.getElementById("candidateModal").style.display="block";
+
+    currentSlide=0;
+
+    showSlide(currentSlide);
+
+
+    document.getElementById("nextBtn").onclick=function(){
+
+        const slides=document.querySelectorAll(".slide");
+
+        if(currentSlide<slides.length-1){
+
+            currentSlide++;
+
+            showSlide(currentSlide);
+
+        }
+
+    };
+
+
+    document.getElementById("prevBtn").onclick=function(){
+
+        if(currentSlide>0){
+
+            currentSlide--;
+
+            showSlide(currentSlide);
+
+        }
+
+    };
+
+}
+
+
+
+function showSlide(index){
+
+    const slides = document.querySelectorAll(".slide");
+
+    slides.forEach(slide => {
+
+        slide.classList.remove("active");
+
+    });
+
+    slides[index].classList.add("active");
+
+    // Update Navigation Dots
+    const dots = document.querySelectorAll("#slideCounter .dot");
+
+    dots.forEach(dot => {
+
+        dot.classList.remove("active");
+
+    });
+
+    if(dots[index]){
+
+        dots[index].classList.add("active");
+
+    }
+
+}
+
+
+
+document.querySelector(".close").onclick=function(){
+
+    document.getElementById("candidateModal").style.display="none";
+
+};
+
+
+
+window.onclick=function(event){
+
+    const modal=document.getElementById("candidateModal");
+
+    if(event.target===modal){
+
+        modal.style.display="none";
+
+    }
+
+};
+
+</script>
+<div id="settings" style="height:1px;"></div>
+</body>
+
+</html>
